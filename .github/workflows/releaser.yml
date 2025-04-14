@@ -75,7 +75,7 @@ jobs:
 
   release:
     if: startsWith(github.ref, 'refs/tags/')
-    needs: [verify_backend_quality, verify_backend_security]
+    needs: [verify_backend_quality, verify_backend_security, unit_tests_coverage]
     name: Release
     runs-on: ubuntu-latest
     steps:
@@ -88,3 +88,6 @@ jobs:
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v5
+        with:
+          version: '~> v2'
+          args: release --clean
