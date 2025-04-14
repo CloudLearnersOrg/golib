@@ -60,11 +60,9 @@ func (l *jsonLogger) log(level logLevel, msg string, fields map[string]any) {
 	var mergedFields map[string]any
 
 	// Only allocate map if we have fields to merge
-	if len(l.fields) > 0 || (fields != nil && len(fields) > 0) {
-		mapSize := len(l.fields)
-		if fields != nil {
-			mapSize += len(fields)
-		}
+	// Fixed S1009: Removed unnecessary nil check since len() for nil maps is defined as zero
+	if len(l.fields) > 0 || len(fields) > 0 {
+		mapSize := len(l.fields) + len(fields)
 		mergedFields = make(map[string]any, mapSize)
 
 		// Add app fields first
@@ -72,11 +70,10 @@ func (l *jsonLogger) log(level logLevel, msg string, fields map[string]any) {
 			mergedFields[k] = v
 		}
 
-		// Add log-specific fields, potentially overriding app fields
-		if fields != nil {
-			for k, v := range fields {
-				mergedFields[k] = v
-			}
+		// Fixed S1031: Removed unnecessary nil check around range
+		// since ranging over a nil map is valid and produces 0 iterations
+		for k, v := range fields {
+			mergedFields[k] = v
 		}
 	}
 
@@ -86,7 +83,8 @@ func (l *jsonLogger) log(level logLevel, msg string, fields map[string]any) {
 		Message:   msg,
 	}
 
-	if mergedFields != nil && len(mergedFields) > 0 {
+	// Fixed S1009: Removed unnecessary nil check
+	if len(mergedFields) > 0 {
 		entry.Fields = &mergedFields
 	}
 
@@ -96,7 +94,11 @@ func (l *jsonLogger) log(level logLevel, msg string, fields map[string]any) {
 		return
 	}
 
-	fmt.Fprintln(l.out, string(jsonData))
+	// Fixed errcheck: Now checking error from fmt.Fprintln
+	if _, err := fmt.Fprintln(l.out, string(jsonData)); err != nil {
+		fmt.Fprintf(os.Stderr, "Error writing log entry: %v\n", err)
+		return
+	}
 
 	// If fatal, exit the program
 	if level == fatal {
