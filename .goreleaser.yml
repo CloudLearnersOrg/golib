@@ -1,0 +1,26 @@
+# .goreleaser.yml
+project_name: golib
+
+builds:
+  - skip: true
+
+release:
+  disable: false
+
+checksum:
+  disable: false
+
+archives:
+  - format: tar.gz
+    files:
+      - LICENSE
+      - README.md
+      - "**/*.go"
+      - go.mod
+      - go.sum
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^test:'
