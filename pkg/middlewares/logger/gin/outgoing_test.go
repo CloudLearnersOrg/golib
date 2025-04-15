@@ -132,7 +132,11 @@ func TestOutgoingLogger(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Request failed: %v", err)
 			}
-			defer resp.Body.Close()
+			defer func() {
+				if err := resp.Body.Close(); err != nil {
+					t.Errorf("Failed to close response body: %v", err)
+				}
+			}()
 
 			// Check response
 			if resp.StatusCode != tt.statusCode {
