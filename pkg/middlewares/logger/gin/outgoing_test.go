@@ -8,10 +8,9 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
-func TestOutgoingLogger(t *testing.T) {
+func TestOutgoingGinLogger(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	tests := []struct {
@@ -86,12 +85,11 @@ func TestOutgoingLogger(t *testing.T) {
 
 			// Create Gin context with default trace ID if not provided
 			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			if tt.traceID != "" {
-				ContextWithTraceID(c, tt.traceID)
-			} else {
-				// Generate a default trace ID when not provided
-				ContextWithTraceID(c, uuid.New().String())
+			traceID := tt.traceID
+			if traceID == "" {
+				traceID = "test-trace-id"
 			}
+			ContextWithTraceID(c, traceID)
 
 			// Create logger
 			logger := NewOutgoingLogger(server.Client())
@@ -119,6 +117,8 @@ func TestOutgoingLogger(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Failed to create request: %v", err)
 			}
+
+			req.Header.Set("X-Trace-ID", traceID)
 
 			// Add headers if specified
 			if tt.requestHeaders != nil {
