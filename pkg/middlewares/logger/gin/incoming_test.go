@@ -112,7 +112,15 @@ func TestIncomingLogger(t *testing.T) {
 				}
 
 				c.Status(tt.statusCode)
-				c.Writer.Write([]byte(tt.responseBody))
+				// Add error checking for Write operation
+				n, err := c.Writer.Write([]byte(tt.responseBody))
+				if err != nil {
+					t.Errorf("Failed to write response body: %v", err)
+				}
+
+				if n != len(tt.responseBody) {
+					t.Errorf("Failed to write complete response body: wrote %d bytes, expected %d bytes", n, len(tt.responseBody))
+				}
 			})
 
 			// Create a request

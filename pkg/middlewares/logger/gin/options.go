@@ -1,7 +1,14 @@
 package middleware
 
+import "github.com/CloudLearnersOrg/golib/pkg/logger"
+
 // WithField adds a custom field to the logger
 func (m *Middleware) WithField(key string, value interface{}) *Middleware {
+	if key == "" || value == nil {
+		logger.Warnf("WithField: key or value is nil or empty", nil)
+		return m
+	}
+
 	m.fields = append(m.fields, logField{Key: key, Value: value})
 	return m
 }

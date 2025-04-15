@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/CloudLearnersOrg/golib/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -79,7 +80,15 @@ func (o *OutgoingLogger) Do(c *gin.Context, req *http.Request) (*http.Response, 
 	// Capture request body if enabled
 	var requestBody string
 	if o.logRequestBody && req.Body != nil {
-		bodyBytes, _ := io.ReadAll(req.Body)
+		bodyBytes, err := io.ReadAll(req.Body)
+		if err != nil {
+			logger.Warnf("Failed to read request body: %s", map[string]any{
+				"error": err.Error(),
+			})
+
+			return nil, err
+		}
+
 		requestBody = string(bodyBytes)
 		// Restore the body for the actual request
 		req.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))

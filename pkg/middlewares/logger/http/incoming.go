@@ -3,12 +3,12 @@ package middleware
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/CloudLearnersOrg/golib/pkg/logger"
 	"github.com/google/uuid"
 )
 
@@ -61,7 +61,14 @@ func (m *Middleware) Handler(next http.Handler) http.Handler {
 		// Capture request body if enabled
 		var requestBody string
 		if m.logRequestBody && req.Body != nil {
-			bodyBytes, _ := io.ReadAll(req.Body)
+			bodyBytes, err := io.ReadAll(req.Body)
+			if err != nil {
+				logger.Warnf("Failed to read request body: %s", map[string]any{
+					"error": err.Error(),
+				})
+				return
+			}
+
 			requestBody = string(bodyBytes)
 			// Restore the body for further processing
 			req.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
@@ -128,8 +135,18 @@ func (m *Middleware) Handler(next http.Handler) http.Handler {
 
 		// For now, just print to stdout
 		// In a real implementation, you'd use a proper logger
-		logJSON, _ := json.MarshalIndent(logEntry, "", "  ")
-		fmt.Printf("incoming request: %s\n", logJSON)
+		logJSON, err := json.MarshalIndent(logEntry, "", "  ")
+		if err != nil {
+			logger.Warnf("Failed to marshal log entry: %s", map[string]any{
+				"error": err.Error(),
+			})
+
+			return
+		}
+
+		logger.Infof("incoming request: %s\n", map[string]any{
+			"log": string(logJSON),
+		})
 	})
 }
 

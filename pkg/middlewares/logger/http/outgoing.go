@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/CloudLearnersOrg/golib/pkg/logger"
+	"github.com/google/uuid"
 )
 
 // OutgoingLogger wraps http.Client to log outgoing requests
@@ -50,8 +52,12 @@ func (o *OutgoingLogger) Do(req *http.Request) (*http.Response, error) {
 
 	// Get trace ID from context or generate a new one
 	traceID := TraceIDFromContext(req.Context())
-	if traceID == "" {
+	if traceID != "" {
 		traceID = req.Header.Get("X-Trace-ID")
+	}
+
+	if traceID == "" {
+		traceID = uuid.New().String()
 	}
 
 	// Add trace ID to outgoing request headers
@@ -89,9 +95,17 @@ func (o *OutgoingLogger) Do(req *http.Request) (*http.Response, error) {
 
 		// Capture response body if enabled
 		if o.logResponseBody && resp.Body != nil {
-			bodyBytes, _ := ioutil.ReadAll(resp.Body)
+			bodyBytes, err := io.ReadAll(resp.Body)
+			if err != nil {
+				logger.Warnf("Failed to read response body: %s", map[string]any{
+					"error": err.Error(),
+				})
+
+				return nil, err
+			}
+
 			// Restore the body for the caller
-			resp.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+			resp.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 
 			// Try to pretty format JSON
 			var prettyJSON bytes.Buffer
@@ -137,7 +151,14 @@ func (o *OutgoingLogger) Do(req *http.Request) (*http.Response, error) {
 
 	// For now, just print to stdout
 	// In a real implementation, you'd use a proper logger
-	logJSON, _ := json.MarshalIndent(logEntry, "", "  ")
+	logJSON, err := json.MarshalIndent(logEntry, "", "  ")
+	if err != nil {
+		logger.Warnf("Failed to marshal log entry: %s", map[string]any{
+			"error": err.Error(),
+		})
+		return nil, err
+	}
+
 	fmt.Printf("outgoing request: %s\n", logJSON)
 
 	return resp, err

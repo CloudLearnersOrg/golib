@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/CloudLearnersOrg/golib/pkg/logger"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -41,7 +42,23 @@ func (m *Middleware) Handler() gin.HandlerFunc {
 		// Capture request body if enabled
 		var requestBody string
 		if m.logRequestBody && c.Request.Body != nil {
-			bodyBytes, _ := io.ReadAll(c.Request.Body)
+			bodyBytes, err := io.ReadAll(c.Request.Body)
+			if err != nil {
+				if err := c.Error(err); err != nil {
+					// Log the error using our logger package
+					logger.Warnf("Failed to set error in gin context", map[string]any{
+						"error": err.Error(),
+					})
+
+					return
+				}
+
+				logger.Warnf("Failed to read request body: %s", map[string]any{
+					"error": err.Error(),
+				})
+				return
+			}
+
 			requestBody = string(bodyBytes)
 			// Restore the body for further processing
 			c.Request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))

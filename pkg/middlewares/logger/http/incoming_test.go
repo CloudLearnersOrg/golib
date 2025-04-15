@@ -116,7 +116,14 @@ func TestIncomingLogger(t *testing.T) {
 
 				// Set response status and body
 				w.WriteHeader(tt.statusCode)
-				w.Write([]byte(tt.responseBody))
+				n, err := w.Write([]byte(tt.responseBody))
+				if err != nil {
+					t.Errorf("Failed to write response body: %v", err)
+				}
+				if n != len(tt.responseBody) {
+					t.Errorf("Failed to write complete response body: wrote %d bytes, expected %d bytes", n, len(tt.responseBody))
+				}
+
 			})
 
 			// Create a request with the test configuration
@@ -206,7 +213,14 @@ func TestResponseWriter(t *testing.T) {
 		}
 
 		testBody := []byte("test response")
-		rw.Write(testBody)
+		n, err := rw.Write(testBody)
+		if err != nil {
+			t.Errorf("Failed to write test body: %v", err)
+		}
+
+		if n != len(testBody) {
+			t.Errorf("Failed to write complete test body: wrote %d bytes, expected %d bytes", n, len(testBody))
+		}
 
 		if rw.responseBody.Len() > 0 {
 			t.Errorf("Response body captured when disabled: %v", rw.responseBody.String())
