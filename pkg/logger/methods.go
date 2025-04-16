@@ -9,37 +9,37 @@ import (
 // Init initializes the logger with a message
 func Init(msg string) {
 	defaultLogger.initialized = true
-	defaultLogger.log(info, msg, nil)
+	defaultLogger.log(infolevel, msg, nil)
 }
 
 // Tracef logs a message at trace level with fields
 func Tracef(msg string, fields map[string]any) {
-	defaultLogger.log(trace, msg, fields)
+	defaultLogger.log(tracelevel, msg, fields)
 }
 
 // Debugf logs a message at debug level with fields
 func Debugf(msg string, fields map[string]any) {
-	defaultLogger.log(debug, msg, fields)
+	defaultLogger.log(debuglevel, msg, fields)
 }
 
 // Infof logs a message at info level with fields
 func Infof(msg string, fields map[string]any) {
-	defaultLogger.log(info, msg, fields)
+	defaultLogger.log(infolevel, msg, fields)
 }
 
 // Warnf logs a message at warn level with fields
 func Warnf(msg string, fields map[string]any) {
-	defaultLogger.log(warn, msg, fields)
+	defaultLogger.log(warnlevel, msg, fields)
 }
 
 // Errorf logs a message at error level with fields
 func Errorf(msg string, fields map[string]any) {
-	defaultLogger.log(error, msg, fields)
+	defaultLogger.log(errorlevel, msg, fields)
 }
 
 // Fatalf logs a message at fatal level with fields and then exits
 func Fatalf(msg string, fields map[string]any) {
-	defaultLogger.log(fatal, msg, fields)
+	defaultLogger.log(fatallevel, msg, fields)
 }
 
 // SetFields sets global fields that will be included in all log entries
@@ -59,20 +59,20 @@ func SetLevel(level string) {
 	// Case-insensitive matching of log level strings
 	switch level {
 	case "TRACE", "trace":
-		lvl = trace
+		lvl = tracelevel
 	case "DEBUG", "debug":
-		lvl = debug
+		lvl = debuglevel
 	case "INFO", "info":
-		lvl = info
+		lvl = infolevel
 	case "WARN", "warn", "WARNING", "warning":
-		lvl = warn
+		lvl = warnlevel
 	case "ERROR", "error":
-		lvl = error
+		lvl = errorlevel
 	case "FATAL", "fatal":
-		lvl = fatal
+		lvl = fatallevel
 	default:
 		// Default to INFO if invalid level
-		lvl = info
+		lvl = infolevel
 		fmt.Fprintf(os.Stderr, "Warning: Unknown log level '%s', defaulting to INFO\n", level)
 	}
 

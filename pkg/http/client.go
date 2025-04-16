@@ -29,7 +29,7 @@ func NewClient(baseClient *http.Client) *Client {
 // OutgoingRequest performs an outgoing HTTP request with tracing
 func (c *Client) OutgoingRequest(ctx *gin.Context, method, url string, body io.Reader) (*http.Response, error) {
 	req, err := http.NewRequestWithContext(
-		context.WithValue(context.Background(), ginContextKey, ctx),
+		context.WithValue(ctx.Request.Context(), ginContextKey, ctx),
 		method,
 		url,
 		body,
@@ -69,9 +69,12 @@ func newLoggingRoundTripper(next http.RoundTripper) http.RoundTripper {
 func extractTraceID(ctx context.Context) string {
 	if c, exists := ctx.Value(ginContextKey).(*gin.Context); exists {
 		if id, exists := c.Get("X-Trace-ID"); exists {
-			return id.(string)
+			if traceId, ok := id.(string); ok {
+				return traceId
+			}
 		}
 	}
+
 	return ""
 }
 

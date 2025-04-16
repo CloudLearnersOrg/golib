@@ -12,7 +12,7 @@ var defaultLogger *jsonLogger
 
 func init() {
 	// Initialize the default logger with INFO level
-	defaultLogger = newJSONLogger(info)
+	defaultLogger = newJSONLogger(infolevel)
 }
 
 // newJSONLogger creates a new logger with the specified level
@@ -28,12 +28,12 @@ func newJSONLogger(level logLevel) *jsonLogger {
 func (l *jsonLogger) shouldLog(level logLevel) bool {
 	// Mapping log levels to numeric values for comparison
 	levelValues := map[logLevel]int{
-		trace: 0,
-		debug: 1,
-		info:  2,
-		warn:  3,
-		error: 4,
-		fatal: 5,
+		tracelevel: 0,
+		debuglevel: 1,
+		infolevel:  2,
+		warnlevel:  3,
+		errorlevel: 4,
+		fatallevel: 5,
 	}
 
 	// Get numeric values of the configured and message levels
@@ -101,7 +101,7 @@ func (l *jsonLogger) log(level logLevel, msg string, fields map[string]any) {
 	}
 
 	// If fatal, exit the program
-	if level == fatal {
+	if level == fatallevel {
 		os.Exit(1)
 	}
 }
