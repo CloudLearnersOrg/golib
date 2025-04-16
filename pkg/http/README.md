@@ -26,6 +26,7 @@ import (
 
     "github.com/gin-gonic/gin"
     httpclient "github.com/CloudLearnersOrg/golib/pkg/http"
+    logger "github.com/CloudLearnersOrg/golib/pkg/middlewares/logger"
 )
 
 func main() {
@@ -35,7 +36,7 @@ func main() {
 
     // Create Gin router with the middleware
     r := gin.New()
-    r.Use(httpclient.Middleware())
+    r.Use(logger.Middleware())
 
     // Create HTTP client
     client := httpclient.NewClient(nil)
