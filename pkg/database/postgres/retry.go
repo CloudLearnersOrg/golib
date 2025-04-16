@@ -42,16 +42,16 @@ func RetryConnection(ctx context.Context, pgxConfig *pgxpool.Config, validationQ
 			// Test the connection with a ping
 			if err := pool.Ping(ctx); err != nil {
 				pool.Close()
-				err = fmt.Errorf("failed to connect to database: %w", err)
-				return nil, err
+				fmt.Printf("Ping failed during database connection attempt %d/%d: %v", attempt+1, retryAttempts, err)
+				continue
 			}
 
 			// Additionally run a validation query directly
 			var result int
 			if err := pool.QueryRow(ctx, validationQuery).Scan(&result); err != nil {
 				pool.Close()
-				err = fmt.Errorf("validation query failed: %w", err)
-				return nil, err
+				fmt.Printf("Validation query failed during database connection attempt %d/%d: %v", attempt+1, retryAttempts, err)
+				continue
 			}
 
 			return pool, nil
