@@ -11,8 +11,6 @@ import (
 	"github.com/google/uuid"
 )
 
-const TraceIDKey = "X-Trace-ID"
-
 // Client wraps http.Client with tracing and logging capabilities
 type Client struct {
 	*http.Client
@@ -24,14 +22,14 @@ func NewClient(baseClient *http.Client) *Client {
 		baseClient = http.DefaultClient
 	}
 
-	baseClient.Transport = NewLoggingRoundTripper(baseClient.Transport)
+	baseClient.Transport = newLoggingRoundTripper(baseClient.Transport)
 	return &Client{Client: baseClient}
 }
 
 // OutgoingRequest performs an outgoing HTTP request with tracing
-func (c *Client) OutgoingRequest(ginCtx *gin.Context, method, url string, body io.Reader) (*http.Response, error) {
+func (c *Client) OutgoingRequest(ctx *gin.Context, method, url string, body io.Reader) (*http.Response, error) {
 	req, err := http.NewRequestWithContext(
-		context.WithValue(context.Background(), "GinContextKey", ginCtx),
+		context.WithValue(context.Background(), ginContextKey, ctx),
 		method,
 		url,
 		body,
@@ -49,14 +47,14 @@ func Middleware() gin.HandlerFunc {
 		start := time.Now()
 
 		// Get or generate trace ID
-		traceID := c.GetHeader(TraceIDKey)
+		traceID := c.GetHeader("X-Trace-ID")
 		if traceID == "" {
 			traceID = uuid.New().String()
 		}
 
 		// Set trace ID in context for further use
-		c.Set(TraceIDKey, traceID)
-		c.Header(TraceIDKey, traceID)
+		c.Set("X-Trace-ID", traceID)
+		c.Header("X-Trace-ID", traceID)
 
 		// Process request
 		c.Next()
@@ -72,7 +70,7 @@ func (f roundTripperFunc) RoundTrip(req *http.Request) (*http.Response, error) {
 }
 
 // NewLoggingRoundTripper creates a new round tripper that logs outgoing requests
-func NewLoggingRoundTripper(next http.RoundTripper) http.RoundTripper {
+func newLoggingRoundTripper(next http.RoundTripper) http.RoundTripper {
 	if next == nil {
 		next = http.DefaultTransport
 	}
@@ -82,7 +80,7 @@ func NewLoggingRoundTripper(next http.RoundTripper) http.RoundTripper {
 		traceID := extractTraceID(req.Context())
 
 		if traceID != "" {
-			req.Header.Set(TraceIDKey, traceID)
+			req.Header.Set("X-Trace-ID", traceID)
 		}
 
 		resp, err := next.RoundTrip(req)
@@ -91,8 +89,8 @@ func NewLoggingRoundTripper(next http.RoundTripper) http.RoundTripper {
 }
 
 func extractTraceID(ctx context.Context) string {
-	if ginCtx, exists := ctx.Value("GinContextKey").(*gin.Context); exists {
-		if id, exists := ginCtx.Get(TraceIDKey); exists {
+	if c, exists := ctx.Value(ginContextKey).(*gin.Context); exists {
+		if id, exists := c.Get("X-Trace-ID"); exists {
 			return id.(string)
 		}
 	}
