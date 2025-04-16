@@ -38,7 +38,7 @@ func (c *Client) OutgoingRequest(ctx *gin.Context, method, url string, body io.R
 		return nil, err
 	}
 
-	return c.Client.Do(req)
+	return c.Do(req)
 }
 
 type roundTripperFunc func(*http.Request) (*http.Response, error)
