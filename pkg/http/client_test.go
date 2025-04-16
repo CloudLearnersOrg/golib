@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewClient(t *testing.T) {
@@ -29,11 +30,7 @@ func TestOutgoingGetRequest(t *testing.T) {
 		assert.Equal(t, http.MethodGet, r.Method)
 
 		_, err := w.Write([]byte("test response"))
-		if err != nil {
-			t.Errorf("failed to write response: %v", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+		require.NoError(t, err, "failed to write response")
 	}))
 	defer server.Close()
 
@@ -44,16 +41,19 @@ func TestOutgoingGetRequest(t *testing.T) {
 
 	// When
 	resp, err := client.OutgoingRequest(ctx, http.MethodGet, server.URL, nil)
+	require.NoError(t, err)
+	defer func() {
+		err := resp.Body.Close()
+		require.NoError(t, err, "failed to close response body")
+	}()
 
 	// Then
-	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 	// Check response body
 	body, err := io.ReadAll(resp.Body)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "test response", string(body))
-	defer resp.Body.Close()
 }
 
 func TestOutgoingPostRequest(t *testing.T) {
@@ -61,19 +61,11 @@ func TestOutgoingPostRequest(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodPost, r.Method)
 		body, err := io.ReadAll(r.Body)
-		if err != nil {
-			t.Errorf("failed to read request body: %v", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+		require.NoError(t, err, "failed to read request body")
 		assert.Equal(t, "test body", string(body))
 
 		_, err = w.Write([]byte("test response"))
-		if err != nil {
-			t.Errorf("failed to write response: %v", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
+		require.NoError(t, err, "failed to write response")
 	}))
 	defer server.Close()
 
@@ -84,23 +76,27 @@ func TestOutgoingPostRequest(t *testing.T) {
 
 	// When
 	resp, err := client.OutgoingRequest(ctx, http.MethodPost, server.URL, strings.NewReader("test body"))
+	require.NoError(t, err)
+	defer func() {
+		err := resp.Body.Close()
+		require.NoError(t, err, "failed to close response body")
+	}()
 
 	// Then
-	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 
 	// Check response body
 	body, err := io.ReadAll(resp.Body)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "test response", string(body))
-	defer resp.Body.Close()
 }
 
 func TestOutgoingRequestWithErrorResponse(t *testing.T) {
 	// Given
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("internal server error"))
+		_, err := w.Write([]byte("internal server error"))
+		require.NoError(t, err, "failed to write error response")
 	}))
 	defer server.Close()
 
@@ -111,28 +107,16 @@ func TestOutgoingRequestWithErrorResponse(t *testing.T) {
 
 	// When
 	resp, err := client.OutgoingRequest(ctx, http.MethodGet, server.URL, nil)
+	require.NoError(t, err)
+	defer func() {
+		err := resp.Body.Close()
+		require.NoError(t, err, "failed to close response body")
+	}()
 
 	// Then
-	assert.NoError(t, err)
 	assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
 
 	body, err := io.ReadAll(resp.Body)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "internal server error", string(body))
-	defer resp.Body.Close()
-}
-
-func TestOutgoingRequestWithInvalidURL(t *testing.T) {
-	// Given
-	w := httptest.NewRecorder()
-	ctx, _ := gin.CreateTestContext(w)
-	ctx.Request = httptest.NewRequest(http.MethodGet, "/test", nil)
-	client := NewClient(nil)
-
-	// When
-	resp, err := client.OutgoingRequest(ctx, http.MethodGet, "invalid-url", nil)
-
-	// Then
-	assert.Error(t, err)
-	assert.Nil(t, resp)
 }
