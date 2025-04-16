@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/CloudLearnersOrg/golib/pkg/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -88,17 +87,15 @@ func outgoing(req *http.Request, err error, resp *http.Response, traceID string,
 	}
 
 	if err != nil {
+		if resp != nil && resp.StatusCode >= 400 {
+			attrs = append(attrs, "http.response.status_code", resp.StatusCode)
+		}
+
 		slog.Error("outgoing request failed", append(attrs, "error", err)...)
 		return resp, err
 	}
 
 	attrs = append(attrs, "http.response.status_code", resp.StatusCode)
-	logger.LogFilteredStatusCode(resp.StatusCode, "outgoing request", attrs...)
-	if resp.StatusCode >= 400 {
-		slog.Error("outgoing request failed", attrs...)
-		return resp, err
-	}
-
 	slog.Info("outgoing request completed", attrs...)
 	return resp, nil
 }
