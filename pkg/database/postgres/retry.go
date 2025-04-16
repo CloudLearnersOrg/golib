@@ -30,7 +30,7 @@ func RetryConnection(ctx context.Context, pgxConfig *pgxpool.Config, validationQ
 
 	var pool *pgxpool.Pool
 	var err error
-	for attempt := range retryAttempts {
+	for attempt := 0; attempt < retryAttempts; attempt++ {
 		if attempt > 0 {
 			fmt.Printf("Retrying database connection (attempt %d/%d) after %v\n",
 				attempt+1, retryAttempts, retryInterval)
