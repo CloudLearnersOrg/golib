@@ -27,6 +27,7 @@ func TestOutgoingGetRequest(t *testing.T) {
 	// Given
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodGet, r.Method)
+
 		_, err := w.Write([]byte("test response"))
 		if err != nil {
 			t.Errorf("failed to write response: %v", err)
@@ -47,6 +48,12 @@ func TestOutgoingGetRequest(t *testing.T) {
 	// Then
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	// Check response body
+	body, err := io.ReadAll(resp.Body)
+	assert.NoError(t, err)
+	assert.Equal(t, "test response", string(body))
+	defer resp.Body.Close()
 }
 
 func TestOutgoingPostRequest(t *testing.T) {
@@ -81,6 +88,51 @@ func TestOutgoingPostRequest(t *testing.T) {
 	// Then
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	// Check response body
+	body, err := io.ReadAll(resp.Body)
+	assert.NoError(t, err)
+	assert.Equal(t, "test response", string(body))
+	defer resp.Body.Close()
 }
 
-// ...rest of the file remains unchanged...
+func TestOutgoingRequestWithErrorResponse(t *testing.T) {
+	// Given
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("internal server error"))
+	}))
+	defer server.Close()
+
+	w := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(w)
+	ctx.Request = httptest.NewRequest(http.MethodGet, "/test", nil)
+	client := NewClient(nil)
+
+	// When
+	resp, err := client.OutgoingRequest(ctx, http.MethodGet, server.URL, nil)
+
+	// Then
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
+
+	body, err := io.ReadAll(resp.Body)
+	assert.NoError(t, err)
+	assert.Equal(t, "internal server error", string(body))
+	defer resp.Body.Close()
+}
+
+func TestOutgoingRequestWithInvalidURL(t *testing.T) {
+	// Given
+	w := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(w)
+	ctx.Request = httptest.NewRequest(http.MethodGet, "/test", nil)
+	client := NewClient(nil)
+
+	// When
+	resp, err := client.OutgoingRequest(ctx, http.MethodGet, "invalid-url", nil)
+
+	// Then
+	assert.Error(t, err)
+	assert.Nil(t, resp)
+}
