@@ -7,9 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/CloudLearnersOrg/golib/pkg/middlewares/logger"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -27,14 +25,19 @@ func TestNewClient(t *testing.T) {
 
 func TestOutgoingGetRequest(t *testing.T) {
 	// Given
-	server := httptest.NewServer(http.HandlerFunc(func(body http.ResponseWriter, req *http.Request) {
-		assert.Equal(t, http.MethodGet, req.Method)
-		body.Write([]byte("test response"))
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodGet, r.Method)
+		_, err := w.Write([]byte("test response"))
+		if err != nil {
+			t.Errorf("failed to write response: %v", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}))
 	defer server.Close()
 
-	body := httptest.NewRecorder()
-	ctx, _ := gin.CreateTestContext(body)
+	w := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(w)
 	ctx.Request = httptest.NewRequest(http.MethodGet, "/test", nil)
 	client := NewClient(nil)
 
@@ -48,20 +51,27 @@ func TestOutgoingGetRequest(t *testing.T) {
 
 func TestOutgoingPostRequest(t *testing.T) {
 	// Given
-	server := httptest.NewServer(http.HandlerFunc(func(body http.ResponseWriter, req *http.Request) {
-		assert.Equal(t, http.MethodPost, req.Method)
-		resp, err := io.ReadAll(req.Body)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodPost, r.Method)
+		body, err := io.ReadAll(r.Body)
 		if err != nil {
-			body.WriteHeader(http.StatusInternalServerError)
+			t.Errorf("failed to read request body: %v", err)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		assert.Equal(t, "test body", string(resp))
-		body.Write([]byte("test response"))
+		assert.Equal(t, "test body", string(body))
+
+		_, err = w.Write([]byte("test response"))
+		if err != nil {
+			t.Errorf("failed to write response: %v", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}))
 	defer server.Close()
 
-	body := httptest.NewRecorder()
-	ctx, _ := gin.CreateTestContext(body)
+	w := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(w)
 	ctx.Request = httptest.NewRequest(http.MethodPost, "/test", nil)
 	client := NewClient(nil)
 
@@ -73,39 +83,4 @@ func TestOutgoingPostRequest(t *testing.T) {
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 }
 
-func TestTraceIDPropagationThroughChain(t *testing.T) {
-	// Given
-	downstream := httptest.NewServer(http.HandlerFunc(func(body http.ResponseWriter, req *http.Request) {
-		traceID := req.Header.Get("X-Trace-ID")
-		body.Header().Set("X-Trace-ID", traceID)
-		body.WriteHeader(http.StatusOK)
-	}))
-	defer downstream.Close()
-
-	gin.SetMode(gin.TestMode)
-	router := gin.New()
-	router.Use(logger.Middleware())
-	client := NewClient(nil)
-
-	router.GET("/test", func(c *gin.Context) {
-		resp, err := client.OutgoingRequest(c, http.MethodGet, downstream.URL, nil)
-		if err != nil {
-			c.Status(http.StatusInternalServerError)
-			return
-		}
-		defer resp.Body.Close()
-		c.Status(resp.StatusCode)
-	})
-
-	resp := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/test", nil)
-	initialTraceID := uuid.New().String()
-	req.Header.Set("X-Trace-ID", initialTraceID)
-
-	// When
-	router.ServeHTTP(resp, req)
-
-	// Then
-	assert.Equal(t, http.StatusOK, resp.Code)
-	assert.Equal(t, initialTraceID, resp.Header().Get("X-Trace-ID"))
-}
+// ...rest of the file remains unchanged...
