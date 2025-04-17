@@ -7,48 +7,54 @@ import (
 )
 
 func setDefaults(c *Connection) {
-	defaultValidationQuery := "SELECT 1"
-	defaultConfigSSLMode := "disable"
+	initializeConnectionPool(c)
+	setConnectionDefaults(c)
+	setPoolDefaults(c.ConnectionPool)
+}
 
-	// Initialize ConnectionPool if nil to avoid panic
+func initializeConnectionPool(c *Connection) {
 	if c.ConnectionPool == nil {
 		logger.Warnf("ConnectionPool is nil, using default settings", nil)
 		c.ConnectionPool = &ConnectionPool{}
 	}
+}
 
-	if c.ConnectionPool.ValidationQuery == "" {
-		c.ConnectionPool.ValidationQuery = defaultValidationQuery
-	}
-
+func setConnectionDefaults(c *Connection) {
 	if c.SSLMode == "" {
-		c.SSLMode = defaultConfigSSLMode
+		c.SSLMode = "disable"
+	}
+}
+
+func setPoolDefaults(pool *ConnectionPool) {
+	if pool.ValidationQuery == "" {
+		pool.ValidationQuery = "SELECT 1"
 	}
 
-	if c.ConnectionPool.MinPoolSize == 0 {
-		c.ConnectionPool.MinPoolSize = 2
+	if pool.MinPoolSize == 0 {
+		pool.MinPoolSize = 2
 	}
 
-	if c.ConnectionPool.MaxPoolSize == 0 {
-		c.ConnectionPool.MaxPoolSize = 10
+	if pool.MaxPoolSize == 0 {
+		pool.MaxPoolSize = 10
 	}
 
-	if c.ConnectionPool.MaxConnectionIdleTime == 0 {
-		c.ConnectionPool.MaxConnectionIdleTime = 30 * time.Second
+	if pool.MaxConnectionIdleTime == 0 {
+		pool.MaxConnectionIdleTime = 30 * time.Second
 	}
 
-	if c.ConnectionPool.MaxConnectionLifetime == 0 {
-		c.ConnectionPool.MaxConnectionLifetime = 90 * time.Second
+	if pool.MaxConnectionLifetime == 0 {
+		pool.MaxConnectionLifetime = 90 * time.Second
 	}
 
-	if c.ConnectionPool.ConnectionTimeout == 0 {
-		c.ConnectionPool.ConnectionTimeout = 5 * time.Second
+	if pool.ConnectionTimeout == 0 {
+		pool.ConnectionTimeout = 5 * time.Second
 	}
 
-	if c.ConnectionPool.RetryAttempts == 0 {
-		c.ConnectionPool.RetryAttempts = 3
+	if pool.RetryAttempts == 0 {
+		pool.RetryAttempts = 3
 	}
 
-	if c.ConnectionPool.RetryInterval == 0 {
-		c.ConnectionPool.RetryInterval = 3 * time.Second
+	if pool.RetryInterval == 0 {
+		pool.RetryInterval = 3 * time.Second
 	}
 }
