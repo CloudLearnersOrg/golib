@@ -6,6 +6,28 @@ It provides a wrapper around the `pgx` library to initialize the database connec
 
 ## Usage
 
+### Configuration Options
+
+#### Connection Parameters
+- `Host` - Database server hostname or IP address (default: none, required)
+- `Port` - Database server port (default: none, required)
+- `Username` - Database user name (default: none, required)
+- `Password` - Database password (default: none, required)
+- `Database` - Database name to connect to (default: none, required)
+- `SSLMode` - SSL mode for connection (default: "disable")
+
+#### Connection Pool Parameters
+All pool parameters are optional and have reasonable defaults:
+
+- `MinPoolSize` - Minimum number of connections in the pool (default: 2)
+- `MaxPoolSize` - Maximum number of connections in the pool (default: 10)
+- `MaxConnectionIdleTime` - Maximum time a connection can be idle (default: 30s)
+- `MaxConnectionLifetime` - Maximum lifetime of a connection (default: 90s)
+- `ConnectionTimeout` - Maximum time to wait when establishing a connection (default: 5s)
+- `ValidationQuery` - Query used to validate connections (default: "SELECT 1")
+- `RetryAttempts` - Number of connection retry attempts (default: 3)
+- `RetryInterval` - Time to wait between retry attempts (default: 3s)
+
 ### Simple setup
 
 ```go
