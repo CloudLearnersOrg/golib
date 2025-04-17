@@ -41,3 +41,13 @@ func NewDatabase(config Connection) (*Database, error) {
 		config:     config,
 	}, nil
 }
+
+func (db *Database) Close() {
+	if db.poolDriver != nil {
+		db.poolDriver.Close()
+	}
+}
+
+func (db *Database) Pool() *pgxpool.Pool {
+	return db.poolDriver
+}
