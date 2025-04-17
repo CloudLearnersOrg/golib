@@ -32,8 +32,12 @@ func RetryConnection(ctx context.Context, pgxConfig *pgxpool.Config, validationQ
 	var err error
 	for attempt := 0; attempt < retryAttempts; attempt++ {
 		if attempt > 0 {
-			fmt.Printf("Retrying database connection (attempt %d/%d) after %v\n",
-				attempt+1, retryAttempts, retryInterval)
+			logger.Warnf("Retrying database connection", map[string]any{
+				"attempt":       attempt + 1,
+				"totalAttempts": retryAttempts,
+				"error":         err,
+			})
+
 			time.Sleep(retryInterval)
 		}
 
@@ -42,7 +46,12 @@ func RetryConnection(ctx context.Context, pgxConfig *pgxpool.Config, validationQ
 			// Test the connection with a ping
 			if err := pool.Ping(ctx); err != nil {
 				pool.Close()
-				fmt.Printf("Ping failed during database connection attempt %d/%d: %v", attempt+1, retryAttempts, err)
+				logger.Errorf("Ping failed during database connection attempt", map[string]any{
+					"attempt":       attempt + 1,
+					"totalAttempts": retryAttempts,
+					"error":         err,
+				})
+
 				continue
 			}
 
@@ -50,7 +59,13 @@ func RetryConnection(ctx context.Context, pgxConfig *pgxpool.Config, validationQ
 			var result int
 			if err := pool.QueryRow(ctx, validationQuery).Scan(&result); err != nil {
 				pool.Close()
-				fmt.Printf("Validation query failed during database connection attempt %d/%d: %v", attempt+1, retryAttempts, err)
+				logger.Errorf("Validation query failed during database connection attempt", map[string]any{
+					"attempt":       attempt + 1,
+					"totalAttempts": retryAttempts,
+					"error":         err,
+					"query":         validationQuery,
+				})
+
 				continue
 			}
 
