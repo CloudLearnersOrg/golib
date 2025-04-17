@@ -5,12 +5,12 @@ import "io"
 type logLevel string
 
 const (
-	trace logLevel = "TRACE"
-	debug logLevel = "DEBUG"
-	info  logLevel = "INFO"
-	warn  logLevel = "WARN"
-	error logLevel = "ERROR"
-	fatal logLevel = "FATAL"
+	tracelevel logLevel = "TRACE"
+	debuglevel logLevel = "DEBUG"
+	infolevel  logLevel = "INFO"
+	warnlevel  logLevel = "WARN"
+	errorlevel logLevel = "ERROR"
+	fatallevel logLevel = "FATAL"
 )
 
 // jsonLogger is the internal logger implementation
