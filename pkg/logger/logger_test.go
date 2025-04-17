@@ -27,25 +27,25 @@ func TestLoggerOutputsCorrectJsonFormat(t *testing.T) {
 	}{
 		{
 			name:    "simple info message without fields",
-			level:   info,
+			level:   infolevel,
 			message: "test info message",
 			fields:  nil,
 			expected: func(entry testLogEntry) bool {
-				return entry.Level == string(info) &&
+				return entry.Level == string(infolevel) &&
 					entry.Message == "test info message" &&
 					entry.Fields == nil
 			},
 		},
 		{
 			name:    "error message with fields",
-			level:   error,
+			level:   errorlevel,
 			message: "test error message",
 			fields: map[string]any{
 				"errorCode": 500,
 				"source":    "database",
 			},
 			expected: func(entry testLogEntry) bool {
-				if entry.Level != string(error) || entry.Message != "test error message" || entry.Fields == nil {
+				if entry.Level != string(errorlevel) || entry.Message != "test error message" || entry.Fields == nil {
 					return false
 				}
 				fields := *entry.Fields
@@ -54,7 +54,7 @@ func TestLoggerOutputsCorrectJsonFormat(t *testing.T) {
 		},
 		{
 			name:    "debug message with mixed type fields",
-			level:   debug,
+			level:   debuglevel,
 			message: "test debug message",
 			fields: map[string]any{
 				"bool":   true,
@@ -63,7 +63,7 @@ func TestLoggerOutputsCorrectJsonFormat(t *testing.T) {
 				"array":  []int{1, 2, 3},
 			},
 			expected: func(entry testLogEntry) bool {
-				if entry.Level != string(debug) || entry.Message != "test debug message" || entry.Fields == nil {
+				if entry.Level != string(debuglevel) || entry.Message != "test debug message" || entry.Fields == nil {
 					return false
 				}
 				fields := *entry.Fields
@@ -89,7 +89,7 @@ func TestLoggerOutputsCorrectJsonFormat(t *testing.T) {
 			t.Run(tc.name, func(t *testing.T) {
 				// Given
 				buf := &bytes.Buffer{}
-				logger := newJSONLogger(trace) // Use trace to ensure all logs are recorded
+				logger := newJSONLogger(tracelevel)
 				logger.out = buf
 
 				// When
@@ -120,7 +120,7 @@ func TestLoggerOutputsCorrectJsonFormat(t *testing.T) {
 func TestFieldMergingPrioritizesLogFieldsOverGlobals(t *testing.T) {
 	// Given
 	buf := &bytes.Buffer{}
-	logger := newJSONLogger(info)
+	logger := newJSONLogger(infolevel)
 	logger.out = buf
 
 	// Global fields
@@ -136,7 +136,7 @@ func TestFieldMergingPrioritizesLogFieldsOverGlobals(t *testing.T) {
 		"request_id": "req-123",
 	}
 
-	logger.log(info, "test message", logFields)
+	logger.log(infolevel, "test message", logFields)
 
 	// Then - Parse and validate the output
 	var entry testLogEntry
@@ -193,7 +193,7 @@ func TestAllLogLevelFunctionsProduceCorrectOutput(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			// Use a fresh buffer and logger for each test
 			buf := &bytes.Buffer{}
-			testLogger := newJSONLogger(trace)
+			testLogger := newJSONLogger(tracelevel)
 			testLogger.out = buf
 
 			// Critical section: update the global logger
@@ -245,7 +245,7 @@ func TestSetOutputChangesDestination(t *testing.T) {
 	buf1 := &bytes.Buffer{}
 	buf2 := &bytes.Buffer{}
 
-	testLogger := newJSONLogger(info)
+	testLogger := newJSONLogger(infolevel)
 	testLogger.out = buf1
 	defaultLogger = testLogger
 
@@ -287,7 +287,7 @@ func TestSetFieldsAddsGlobalFields(t *testing.T) {
 	defer func() { defaultLogger = origLogger }()
 
 	buf := &bytes.Buffer{}
-	testLogger := newJSONLogger(info)
+	testLogger := newJSONLogger(infolevel)
 	testLogger.out = buf
 	defaultLogger = testLogger
 
@@ -428,7 +428,7 @@ func TestSetLevelFiltersMessages(t *testing.T) {
 			buf := &bytes.Buffer{}
 
 			// Create a new logger and set it as default
-			testLogger := newJSONLogger(info) // Default level will be overridden by SetLevel
+			testLogger := newJSONLogger(infolevel)
 			testLogger.out = buf
 			defaultLogger = testLogger
 
@@ -488,21 +488,21 @@ func TestSetLevelCaseInsensitivity(t *testing.T) {
 		input         string
 		expectedLevel logLevel
 	}{
-		{"info", info},
-		{"INFO", info},
-		{"debug", debug},
-		{"DEBUG", debug},
-		{"trace", trace},
-		{"TRACE", trace},
-		{"warn", warn},
-		{"WARN", warn},
-		{"warning", warn},
-		{"WARNING", warn},
-		{"error", error},
-		{"ERROR", error},
-		{"fatal", fatal},
-		{"FATAL", fatal},
-		{"invalid", info}, // Default to info for invalid levels
+		{"info", infolevel},
+		{"INFO", infolevel},
+		{"debug", debuglevel},
+		{"DEBUG", debuglevel},
+		{"trace", tracelevel},
+		{"TRACE", tracelevel},
+		{"warn", warnlevel},
+		{"WARN", warnlevel},
+		{"warning", warnlevel},
+		{"WARNING", warnlevel},
+		{"error", errorlevel},
+		{"ERROR", errorlevel},
+		{"fatal", fatallevel},
+		{"FATAL", fatallevel},
+		{"invalid", infolevel}, // Default to info for invalid levels
 	}
 
 	for _, tc := range testCases {
