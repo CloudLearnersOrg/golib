@@ -22,6 +22,8 @@ func NewRedisClient(config Connection) (*redis.Client, error) {
 		opts.ReadTimeout = config.ConnectionPool.ReadTimeout
 		opts.WriteTimeout = config.ConnectionPool.WriteTimeout
 		opts.PoolTimeout = config.ConnectionPool.PoolTimeout
+		opts.IdleTimeout = config.ConnectionPool.IdleTimeout
+		opts.MaxConnAge = config.ConnectionPool.MaxConnAge
 	}
 
 	client := redis.NewClient(opts)
