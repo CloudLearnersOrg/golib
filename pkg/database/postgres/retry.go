@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/CloudLearnersOrg/golib/pkg/logger"
+	"github.com/CloudLearnersOrg/golib/pkg/log"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
@@ -17,7 +17,7 @@ func RetryConnection(ctx context.Context, pgxConfig *pgxpool.Config, validationQ
 		var result int
 		err := conn.QueryRow(ctx, validationQuery).Scan(&result)
 		if err != nil {
-			logger.Errorf("validation query failed", map[string]any{
+			log.Errorf("validation query failed", map[string]any{
 				"error": err,
 				"query": validationQuery,
 			})
@@ -32,7 +32,7 @@ func RetryConnection(ctx context.Context, pgxConfig *pgxpool.Config, validationQ
 	var err error
 	for attempt := range retryAttempts {
 		if attempt > 0 {
-			logger.Warnf("Retrying database connection", map[string]any{
+			log.Warnf("Retrying database connection", map[string]any{
 				"attempt":       attempt + 1,
 				"totalAttempts": retryAttempts,
 				"error":         err,
@@ -46,7 +46,7 @@ func RetryConnection(ctx context.Context, pgxConfig *pgxpool.Config, validationQ
 			// Test the connection with a ping
 			if err := pool.Ping(ctx); err != nil {
 				pool.Close()
-				logger.Errorf("Ping failed during database connection attempt", map[string]any{
+				log.Errorf("Ping failed during database connection attempt", map[string]any{
 					"attempt":       attempt + 1,
 					"totalAttempts": retryAttempts,
 					"error":         err,
@@ -59,7 +59,7 @@ func RetryConnection(ctx context.Context, pgxConfig *pgxpool.Config, validationQ
 			var result int
 			if err := pool.QueryRow(ctx, validationQuery).Scan(&result); err != nil {
 				pool.Close()
-				logger.Errorf("Validation query failed during database connection attempt", map[string]any{
+				log.Errorf("Validation query failed during database connection attempt", map[string]any{
 					"attempt":       attempt + 1,
 					"totalAttempts": retryAttempts,
 					"error":         err,

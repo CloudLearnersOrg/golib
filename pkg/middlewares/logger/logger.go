@@ -4,7 +4,6 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/CloudLearnersOrg/golib/pkg/logger"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -41,11 +40,16 @@ func incoming(ctx *gin.Context, traceID string, duration time.Duration) {
 		"http.response.latency", duration.String(),
 	}
 
-	logger.LogFilteredStatusCode(ctx.Writer.Status(), "incoming request", attrs...)
-	if ctx.Writer.Status() >= 400 {
-		slog.Error("incoming request failed", attrs...)
-		return
-	}
+	logFilteredStatusCode(ctx.Writer.Status(), "incoming request", attrs...)
+}
 
-	slog.Info("incoming request completed", attrs...)
+func logFilteredStatusCode(status int, prefix string, attrs ...any) {
+	switch {
+	case status >= 500:
+		slog.Error(prefix+" failed", attrs...)
+	case status >= 400:
+		slog.Warn(prefix+" warning", attrs...)
+	default:
+		slog.Info(prefix+" completed", attrs...)
+	}
 }

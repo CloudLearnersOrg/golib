@@ -12,7 +12,7 @@ func TestLogFilteredStatusCode_WhenStatusIs5xx_ShouldLogAsError(t *testing.T) {
 	prefix := "test"
 
 	// When
-	LogFilteredStatusCode(statusCode, prefix)
+	logFilteredStatusCode(statusCode, prefix)
 
 	// Then
 	assert.GreaterOrEqual(t, statusCode, 500)
@@ -25,7 +25,7 @@ func TestLogFilteredStatusCode_WhenStatusIs4xx_ShouldLogAsWarning(t *testing.T) 
 	prefix := "test"
 
 	// When
-	LogFilteredStatusCode(statusCode, prefix)
+	logFilteredStatusCode(statusCode, prefix)
 
 	// Then
 	assert.GreaterOrEqual(t, statusCode, 400)
@@ -38,7 +38,7 @@ func TestLogFilteredStatusCode_WhenStatusIs2xx_ShouldLogAsInfo(t *testing.T) {
 	prefix := "test"
 
 	// When
-	LogFilteredStatusCode(statusCode, prefix)
+	logFilteredStatusCode(statusCode, prefix)
 
 	// Then
 	assert.GreaterOrEqual(t, statusCode, 200)

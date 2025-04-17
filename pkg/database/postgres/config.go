@@ -3,7 +3,7 @@ package postgres
 import (
 	"time"
 
-	"github.com/CloudLearnersOrg/golib/pkg/logger"
+	"github.com/CloudLearnersOrg/golib/pkg/log"
 )
 
 func setDefaults(c *Connection) {
@@ -14,7 +14,7 @@ func setDefaults(c *Connection) {
 
 func initializeConnectionPool(c *Connection) {
 	if c.ConnectionPool == nil {
-		logger.Warnf("ConnectionPool is nil, using default settings", nil)
+		log.Warnf("ConnectionPool is nil, using default settings", nil)
 		c.ConnectionPool = &ConnectionPool{}
 	}
 }
