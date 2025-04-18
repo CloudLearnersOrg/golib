@@ -27,16 +27,15 @@ func NewClient(baseClient *http.Client) *Client {
 
 // OutgoingRequest performs an outgoing HTTP request with tracing
 func (c *Client) OutgoingRequest(ctx *gin.Context, method, url string, body io.Reader) (*http.Response, error) {
-	req, err := http.NewRequestWithContext(ctx, method, url, body)
+	req, err := http.NewRequestWithContext(
+		context.WithValue(ctx.Request.Context(), ginContextKey, ctx),
+		method,
+		url,
+		body,
+	)
+
 	if err != nil {
 		return nil, err
-	}
-
-	// Explicitly copy trace ID from gin context to request headers
-	if traceID, exists := ctx.Get("X-Trace-ID"); exists {
-		if tid, ok := traceID.(string); ok {
-			req.Header.Set("X-Trace-ID", tid)
-		}
 	}
 
 	return c.Do(req)
