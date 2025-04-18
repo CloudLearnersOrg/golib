@@ -26,16 +26,20 @@ func NewClient(baseClient *http.Client) *Client {
 }
 
 // OutgoingRequest performs an outgoing HTTP request with tracing
-func (c *Client) OutgoingRequest(ctx *gin.Context, method, url string, body io.Reader) (*http.Response, error) {
+func (c *Client) OutgoingRequest(ctx *gin.Context, method, url string, body io.Reader, headers map[string]string) (*http.Response, error) {
 	req, err := http.NewRequestWithContext(
 		context.WithValue(ctx.Request.Context(), ginContextKey, ctx),
 		method,
 		url,
 		body,
 	)
-
 	if err != nil {
 		return nil, err
+	}
+
+	// Set headers if provided
+	for key, value := range headers {
+		req.Header.Set(key, value)
 	}
 
 	return c.Do(req)
