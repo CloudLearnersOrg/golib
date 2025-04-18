@@ -1,6 +1,6 @@
-# httpclient
+# http
 
-The `httpclient` package is written to make wider usage for Gin requests and record incoming and outgoing requests in JSON format.
+The `http` package is written to make wider usage for Gin requests and record incoming and outgoing requests in JSON format.
 
 ## Features
 - Automatic trace ID generation and propagation
@@ -25,7 +25,7 @@ import (
     "os"
 
     "github.com/gin-gonic/gin"
-    httpclient "github.com/CloudLearnersOrg/golib/pkg/http"
+    http "github.com/CloudLearnersOrg/golib/pkg/http"
     logger "github.com/CloudLearnersOrg/golib/pkg/middlewares/logger"
 )
 
@@ -39,7 +39,7 @@ func main() {
     r.Use(logger.Middleware())
 
     // Create HTTP client
-    client := httpclient.NewClient(nil)
+    client := http.NewClient(nil)
 
     // Define your routes
     r.GET("/example", func(c *gin.Context) {
@@ -111,5 +111,5 @@ customClient := &http.Client{
     Timeout: 30 * time.Second,
     // Add other configurations
 }
-client := httpclient.NewClient(customClient)
+client := http.NewClient(customClient)
 ```
