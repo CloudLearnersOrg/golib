@@ -14,6 +14,11 @@ import (
 func setupTest() (*gin.Context, *httptest.ResponseRecorder) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
+
+	// Set up a mock request
+	req := httptest.NewRequest("GET", "/", nil)
+	c.Request = req
+
 	return c, w
 }
 
@@ -49,55 +54,6 @@ func TestStatusResponses(t *testing.T) {
 				Code:    http.StatusCreated,
 				Message: "created",
 				Data:    map[string]interface{}{"id": "123"},
-			},
-		},
-		// 3xx status codes
-		{
-			name: "StatusMovedPermanently",
-			execute: func(c *gin.Context) {
-				StatusMovedPermanently(c, "/new-location")
-			},
-			wantStatus: http.StatusMovedPermanently,
-			wantBody: Response{
-				Code:    http.StatusMovedPermanently,
-				Message: "moved",
-				Data:    "/new-location",
-			},
-		},
-		{
-			name: "StatusFound",
-			execute: func(c *gin.Context) {
-				StatusFound(c, "/temp-location")
-			},
-			wantStatus: http.StatusFound,
-			wantBody: Response{
-				Code:    http.StatusFound,
-				Message: "found",
-				Data:    "/temp-location",
-			},
-		},
-		{
-			name: "StatusTemporaryRedirect",
-			execute: func(c *gin.Context) {
-				StatusTemporaryRedirect(c, "/temp")
-			},
-			wantStatus: http.StatusTemporaryRedirect,
-			wantBody: Response{
-				Code:    http.StatusTemporaryRedirect,
-				Message: "temp redirect",
-				Data:    "/temp",
-			},
-		},
-		{
-			name: "StatusPermanentRedirect",
-			execute: func(c *gin.Context) {
-				StatusPermanentRedirect(c, "/perm")
-			},
-			wantStatus: http.StatusPermanentRedirect,
-			wantBody: Response{
-				Code:    http.StatusPermanentRedirect,
-				Message: "perm redirect",
-				Data:    "/perm",
 			},
 		},
 		// 4xx status codes
@@ -272,6 +228,64 @@ func TestStatusResponses(t *testing.T) {
 			if tt.wantBody.Error != "" {
 				assert.Equal(t, tt.wantBody.Error, response.Error)
 			}
+		})
+	}
+}
+
+func TestRedirectResponses(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	tests := []struct {
+		name         string
+		execute      func(*gin.Context)
+		wantStatus   int
+		wantLocation string
+	}{
+		{
+			name: "StatusMovedPermanently",
+			execute: func(c *gin.Context) {
+				StatusMovedPermanently(c, "/new-location")
+			},
+			wantStatus:   http.StatusMovedPermanently,
+			wantLocation: "/new-location",
+		},
+		{
+			name: "StatusFound",
+			execute: func(c *gin.Context) {
+				StatusFound(c, "/temp-location")
+			},
+			wantStatus:   http.StatusFound,
+			wantLocation: "/temp-location",
+		},
+		{
+			name: "StatusTemporaryRedirect",
+			execute: func(c *gin.Context) {
+				StatusTemporaryRedirect(c, "/temp")
+			},
+			wantStatus:   http.StatusTemporaryRedirect,
+			wantLocation: "/temp",
+		},
+		{
+			name: "StatusPermanentRedirect",
+			execute: func(c *gin.Context) {
+				StatusPermanentRedirect(c, "/perm")
+			},
+			wantStatus:   http.StatusPermanentRedirect,
+			wantLocation: "/perm",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Given
+			c, w := setupTest()
+
+			// When
+			tt.execute(c)
+
+			// Then
+			assert.Equal(t, tt.wantStatus, w.Code)
+			assert.Equal(t, tt.wantLocation, w.Header().Get("Location"))
 		})
 	}
 }
