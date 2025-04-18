@@ -53,21 +53,9 @@ func TestStatusResponses(t *testing.T) {
 		},
 		// 3xx status codes
 		{
-			name: "StatusMultipleChoices",
-			execute: func(c *gin.Context) {
-				StatusMultipleChoices(c, "multiple choices", []string{"url1", "url2"})
-			},
-			wantStatus: http.StatusMultipleChoices,
-			wantBody: Response{
-				Code:    http.StatusMultipleChoices,
-				Message: "multiple choices",
-				Data:    []interface{}{"url1", "url2"},
-			},
-		},
-		{
 			name: "StatusMovedPermanently",
 			execute: func(c *gin.Context) {
-				StatusMovedPermanently(c, "moved", "/new-location")
+				StatusMovedPermanently(c, "/new-location")
 			},
 			wantStatus: http.StatusMovedPermanently,
 			wantBody: Response{
@@ -79,7 +67,7 @@ func TestStatusResponses(t *testing.T) {
 		{
 			name: "StatusFound",
 			execute: func(c *gin.Context) {
-				StatusFound(c, "found", "/temp-location")
+				StatusFound(c, "/temp-location")
 			},
 			wantStatus: http.StatusFound,
 			wantBody: Response{
@@ -89,21 +77,9 @@ func TestStatusResponses(t *testing.T) {
 			},
 		},
 		{
-			name: "StatusSeeOther",
-			execute: func(c *gin.Context) {
-				StatusSeeOther(c, "see other", "/other-location")
-			},
-			wantStatus: http.StatusSeeOther,
-			wantBody: Response{
-				Code:    http.StatusSeeOther,
-				Message: "see other",
-				Data:    "/other-location",
-			},
-		},
-		{
 			name: "StatusTemporaryRedirect",
 			execute: func(c *gin.Context) {
-				StatusTemporaryRedirect(c, "temp redirect", "/temp")
+				StatusTemporaryRedirect(c, "/temp")
 			},
 			wantStatus: http.StatusTemporaryRedirect,
 			wantBody: Response{
@@ -115,7 +91,7 @@ func TestStatusResponses(t *testing.T) {
 		{
 			name: "StatusPermanentRedirect",
 			execute: func(c *gin.Context) {
-				StatusPermanentRedirect(c, "perm redirect", "/perm")
+				StatusPermanentRedirect(c, "/perm")
 			},
 			wantStatus: http.StatusPermanentRedirect,
 			wantBody: Response{
