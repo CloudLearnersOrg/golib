@@ -6,12 +6,13 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"strconv"
 	"time"
 )
 
 func GenerateToken(secret string) string {
 	timestamp := time.Now().Unix()
-	message := fmt.Sprintf("%d", timestamp)
+	message := strconv.FormatInt(timestamp, 10)
 
 	h := hmac.New(sha256.New, []byte(secret))
 	h.Write([]byte(message))
