@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+// GenerateToken generates a CSRF token using the provided secret.
+// The token consists of a timestamp and an HMAC signature.
 func GenerateToken(secret string) string {
 	timestamp := time.Now().Unix()
 	message := strconv.FormatInt(timestamp, 10)
@@ -21,6 +23,8 @@ func GenerateToken(secret string) string {
 	return fmt.Sprintf("%s:%s", message, signature)
 }
 
+// GenerateSecret generates a random secret for CSRF token signing.
+// The secret is a 32-byte random value encoded in hexadecimal.
 func GenerateSecret() (string, error) {
 	secret := make([]byte, 32)
 	_, err := rand.Read(secret)

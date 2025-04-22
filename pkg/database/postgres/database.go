@@ -7,12 +7,13 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
-type Database struct {
+type database struct {
 	poolDriver *pgxpool.Pool
 	config     Connection
 }
 
-func NewDatabase(config Connection) (*Database, error) {
+// NewDatabase creates a new database connection pool using the provided configuration.
+func NewDatabase(config Connection) (*database, error) {
 	setDefaults(&config)
 
 	dsn := fmt.Sprintf(
@@ -36,18 +37,18 @@ func NewDatabase(config Connection) (*Database, error) {
 		return nil, fmt.Errorf("connect to database: %w", err)
 	}
 
-	return &Database{
+	return &database{
 		poolDriver: connection,
 		config:     config,
 	}, nil
 }
 
-func (db *Database) Close() {
+func (db *database) Close() {
 	if db.poolDriver != nil {
 		db.poolDriver.Close()
 	}
 }
 
-func (db *Database) Pool() *pgxpool.Pool {
+func (db *database) Pool() *pgxpool.Pool {
 	return db.poolDriver
 }

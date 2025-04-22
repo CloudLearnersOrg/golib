@@ -11,7 +11,6 @@ import (
 )
 
 // VerifyCSRFToken verifies the provided CSRF token using the secret.
-// It checks the token's signature and ensures it is not expired.
 func VerifyCSRFToken(token, secret string, maxAge time.Duration) error {
 	parts := strings.Split(token, ":")
 	if len(parts) != 2 {

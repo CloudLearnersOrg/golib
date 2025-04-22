@@ -25,7 +25,7 @@ func NewClient(baseClient *http.Client) *Client {
 	return &Client{Client: baseClient}
 }
 
-// OutgoingRequest performs an outgoing HTTP request with tracing
+// OutgoingRequest performs an outgoing HTTP request with "outgoing" attributes to be logged.
 func (c *Client) OutgoingRequest(ctx *gin.Context, method, url string, body io.Reader, headers map[string]string) (*http.Response, error) {
 	req, err := http.NewRequestWithContext(
 		context.WithValue(ctx.Request.Context(), ginContextKey, ctx),
@@ -47,6 +47,7 @@ func (c *Client) OutgoingRequest(ctx *gin.Context, method, url string, body io.R
 
 type roundTripperFunc func(*http.Request) (*http.Response, error)
 
+// Used for http.RoundTripper interface
 func (f roundTripperFunc) RoundTrip(req *http.Request) (*http.Response, error) {
 	return f(req)
 }
