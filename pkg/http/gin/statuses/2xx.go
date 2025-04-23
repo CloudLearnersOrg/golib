@@ -12,7 +12,6 @@ func StatusOK(ctx *gin.Context, message string, data any) {
 		Message: message,
 		Data:    data,
 	})
-	ctx.Next()
 }
 
 func StatusCreated(ctx *gin.Context, message string, data any) {
@@ -21,5 +20,4 @@ func StatusCreated(ctx *gin.Context, message string, data any) {
 		Message: message,
 		Data:    data,
 	})
-	ctx.Next()
 }

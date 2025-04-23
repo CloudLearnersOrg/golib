@@ -57,7 +57,7 @@ func StatusConflict(ctx *gin.Context, message string, err error) {
 		Message: message,
 		Error:   err.Error(),
 	})
-	ctx.Abort() // Added Abort() to maintain consistency
+	ctx.Abort()
 }
 
 func StatusUnprocessableEntity(ctx *gin.Context, message string, err error) {
