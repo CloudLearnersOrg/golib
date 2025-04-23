@@ -12,6 +12,7 @@ func StatusInternalServerError(ctx *gin.Context, message string, err error) {
 		Message: message,
 		Error:   err.Error(),
 	})
+	ctx.Abort()
 }
 
 func StatusBadGateway(ctx *gin.Context, message string, err error) {
@@ -20,6 +21,7 @@ func StatusBadGateway(ctx *gin.Context, message string, err error) {
 		Message: message,
 		Error:   err.Error(),
 	})
+	ctx.Abort()
 }
 
 func StatusServiceUnavailable(ctx *gin.Context, message string, err error) {
@@ -28,6 +30,7 @@ func StatusServiceUnavailable(ctx *gin.Context, message string, err error) {
 		Message: message,
 		Error:   err.Error(),
 	})
+	ctx.Abort()
 }
 
 func StatusGatewayTimeout(ctx *gin.Context, message string, err error) {
@@ -36,4 +39,5 @@ func StatusGatewayTimeout(ctx *gin.Context, message string, err error) {
 		Message: message,
 		Error:   err.Error(),
 	})
+	ctx.Abort()
 }

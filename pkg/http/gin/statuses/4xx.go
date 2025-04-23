@@ -12,6 +12,7 @@ func StatusBadRequest(ctx *gin.Context, message string, err error) {
 		Message: message,
 		Error:   err.Error(),
 	})
+	ctx.Abort()
 }
 
 func StatusUnauthorized(ctx *gin.Context, message string, err error) {
@@ -20,6 +21,7 @@ func StatusUnauthorized(ctx *gin.Context, message string, err error) {
 		Message: message,
 		Error:   err.Error(),
 	})
+	ctx.Abort()
 }
 
 func StatusForbidden(ctx *gin.Context, message string, err error) {
@@ -28,6 +30,7 @@ func StatusForbidden(ctx *gin.Context, message string, err error) {
 		Message: message,
 		Error:   err.Error(),
 	})
+	ctx.Abort()
 }
 
 func StatusNotFound(ctx *gin.Context, message string, err error) {
@@ -36,6 +39,7 @@ func StatusNotFound(ctx *gin.Context, message string, err error) {
 		Message: message,
 		Error:   err.Error(),
 	})
+	ctx.Abort()
 }
 
 func StatusRequestTimeout(ctx *gin.Context, message string, err error) {
@@ -44,6 +48,7 @@ func StatusRequestTimeout(ctx *gin.Context, message string, err error) {
 		Message: message,
 		Error:   err.Error(),
 	})
+	ctx.Abort()
 }
 
 func StatusConflict(ctx *gin.Context, message string, err error) {
@@ -52,6 +57,7 @@ func StatusConflict(ctx *gin.Context, message string, err error) {
 		Message: message,
 		Error:   err.Error(),
 	})
+	ctx.Abort() // Added Abort() to maintain consistency
 }
 
 func StatusUnprocessableEntity(ctx *gin.Context, message string, err error) {
@@ -60,6 +66,7 @@ func StatusUnprocessableEntity(ctx *gin.Context, message string, err error) {
 		Message: message,
 		Error:   err.Error(),
 	})
+	ctx.Abort()
 }
 
 func StatusTooManyRequests(ctx *gin.Context, message string, err error) {
@@ -68,4 +75,5 @@ func StatusTooManyRequests(ctx *gin.Context, message string, err error) {
 		Message: message,
 		Error:   err.Error(),
 	})
+	ctx.Abort()
 }
