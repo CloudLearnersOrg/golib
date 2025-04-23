@@ -22,6 +22,4 @@ type ConnectionPool struct {
 	ReadTimeout    time.Duration
 	WriteTimeout   time.Duration
 	PoolTimeout    time.Duration
-	IdleTimeout    time.Duration
-	MaxConnAge     time.Duration
 }

@@ -32,8 +32,6 @@
 //   - ReadTimeout: Read timeout
 //   - WriteTimeout: Write timeout
 //   - PoolTimeout: Pool timeout
-//   - IdleTimeout: Connection idle timeout
-//   - MaxConnAge: Maximum connection age
 //
 // Example with Connection Pool:
 //
@@ -49,9 +47,7 @@
 //	        ConnectTimeout: 5 * time.Second,
 //	        ReadTimeout:    3 * time.Second,
 //	        WriteTimeout:   3 * time.Second,
-//	        PoolTimeout:    4 * time.Second,
-//	        IdleTimeout:    300 * time.Second,
-//	        MaxConnAge:     3600 * time.Second,
+//	        PoolTimeout:    4 * time.Second
 //	    },
 //	}
 //

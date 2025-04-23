@@ -1,9 +1,10 @@
 package redis
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/go-redis/redis"
+	"github.com/redis/go-redis/v9"
 )
 
 // NewRedisClient creates a new Redis client with the given configuration
@@ -22,14 +23,13 @@ func NewRedisClient(config Connection) (*redis.Client, error) {
 		opts.ReadTimeout = config.ConnectionPool.ReadTimeout
 		opts.WriteTimeout = config.ConnectionPool.WriteTimeout
 		opts.PoolTimeout = config.ConnectionPool.PoolTimeout
-		opts.IdleTimeout = config.ConnectionPool.IdleTimeout
-		opts.MaxConnAge = config.ConnectionPool.MaxConnAge
 	}
 
 	client := redis.NewClient(opts)
 
-	// Test the connection
-	if err := client.Ping().Err(); err != nil {
+	// Test the connection using context
+	ctx := context.Background()
+	if err := client.Ping(ctx).Err(); err != nil {
 		return nil, fmt.Errorf("failed to connect to Redis: %w", err)
 	}
 
