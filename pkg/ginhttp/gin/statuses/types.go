@@ -1,4 +1,4 @@
-package http
+package ginhttp
 
 type Response struct {
 	Code    int    `json:"code"`

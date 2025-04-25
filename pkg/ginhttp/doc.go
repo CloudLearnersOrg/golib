@@ -1,4 +1,4 @@
-// Package http provides a custom HTTP client with tracing and logging capabilities.
+// Package ginhttp provides a custom HTTP client with tracing and logging capabilities for Gin web applications.
 // It wraps the standard net/http client and integrates with Gin web framework for
 // context propagation and trace ID handling.
 //
@@ -10,7 +10,7 @@
 //
 // Basic usage:
 //
-//	client := http.NewClient(nil) // uses http.DefaultClient as base
+//	client := ginhttp.NewClient(nil)
 //	resp, err := client.OutgoingRequest(
 //		ginCtx,
 //		"GET",
@@ -36,4 +36,4 @@
 //   - http.response.latency: Request duration
 //   - http.response.status_code: Response status code
 //   - error: Error message (if request failed)
-package http
+package ginhttp

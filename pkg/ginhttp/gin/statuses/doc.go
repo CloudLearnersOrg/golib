@@ -1,4 +1,4 @@
-// Package http from http/gin/statuses provides a set of utility functions for handling HTTP responses in a Gin web application.
+// Package ginhttp from http/gin/statuses provides a set of utility functions for handling HTTP responses in a Gin web application.
 // It offers a standardized way to send JSON responses with proper HTTP status codes, messages, and data.
 //
 // The package organizes HTTP status handlers into the following categories:
@@ -28,7 +28,7 @@
 //
 // Error Response Example (4xx/5xx):
 //
-//	http.StatusNotFound(ctx, "User not found", err)
+//	ginhttp.StatusNotFound(ctx, "User not found", err)
 //	// Returns:
 //	// {
 //	//     "code": 404,
@@ -38,7 +38,7 @@
 //
 // Redirect Example (3xx):
 //
-//	http.StatusTemporaryRedirect(ctx, "/new-location")
+//	ginhttp.StatusTemporaryRedirect(ctx, "/new-location")
 //	// Redirects to the specified location with 307 status code
 //
 // The package aims to provide:
@@ -46,4 +46,4 @@
 //   - Type-safe status code handling
 //   - Separation of concerns by status code category
 //   - Easy-to-use interface for common HTTP responses
-package http
+package ginhttp

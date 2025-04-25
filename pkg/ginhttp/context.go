@@ -1,4 +1,4 @@
-package http
+package ginhttp
 
 // Gin Context Key is used to store and retrieve the trace ID from the context
 /* graph LR
