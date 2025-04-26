@@ -9,21 +9,29 @@ import (
 )
 
 func NewMiddleware(cfg SessionConfig) (gin.HandlerFunc, error) {
+	// Set password to empty string if not provided
+	password := cfg.RedisPassword
+	if password == "" {
+		password = ""
+	}
+
+	// Initialize Redis store with conditional password
 	redisStore, err := redis.NewStore(10, "tcp",
 		fmt.Sprintf("%s:%d", cfg.RedisHost, cfg.RedisPort),
-		cfg.RedisPassword,
+		password,
 		cfg.SessionSecret)
+
 	if err != nil {
 		return nil, err
 	}
 
 	// Configure session cookie
 	redisStore.Options(sessions.Options{
-		Path:     "/",
+		Path:     cfg.CookiePath,
 		Domain:   cfg.CookieDomain,
 		MaxAge:   cfg.SessionMaxAge,
 		Secure:   cfg.CookieSecure,
-		HttpOnly: true,
+		HttpOnly: cfg.CookieHttpOnly,
 		SameSite: cfg.SameSite,
 	})
 
