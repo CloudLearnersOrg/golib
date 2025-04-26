@@ -16,11 +16,14 @@ func NewMiddleware(cfg SessionConfig) (gin.HandlerFunc, error) {
 	}
 
 	// Initialize Redis store with conditional password
-	redisStore, err := redis.NewStore(10, "tcp",
+	redisStore, err := redis.NewStore(
+		cfg.RedisConnectionPoolSize, // pool size
+		"tcp",
 		fmt.Sprintf("%s:%d", cfg.RedisHost, cfg.RedisPort),
-		password,
-		cfg.SessionSecret)
-
+		"",                        // username (empty for most Redis versions)
+		cfg.RedisPassword,         // password as string
+		[]byte(cfg.SessionSecret), // key pairs as []byte
+	)
 	if err != nil {
 		return nil, err
 	}

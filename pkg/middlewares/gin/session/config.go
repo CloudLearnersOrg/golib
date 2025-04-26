@@ -11,15 +11,16 @@ const (
 
 // SessionConfig holds configuration for session middleware
 type SessionConfig struct {
-	RedisHost      string
-	RedisPort      int
-	RedisPassword  string
-	SessionSecret  string
-	CookiePath     string
-	CookieDomain   string
-	CookieSecure   bool
-	CookieHttpOnly bool
-	SessionMaxAge  int
-	SameSite       http.SameSite
-	UserKeySecret  string
+	RedisHost               string
+	RedisPort               int
+	RedisPassword           string
+	RedisConnectionPoolSize int
+	SessionSecret           string
+	CookiePath              string
+	CookieDomain            string
+	CookieSecure            bool
+	CookieHttpOnly          bool
+	SessionMaxAge           int
+	SameSite                http.SameSite
+	UserKeySecret           string
 }
