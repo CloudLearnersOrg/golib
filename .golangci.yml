@@ -16,7 +16,6 @@ linters:
     - dogsled
     - dupl
     - durationcheck
-    - err113
     - errchkjson
     - errname
     - errorlint
@@ -24,7 +23,6 @@ linters:
     - exptostd
     - fatcontext
     - forbidigo
-    - forcetypeassert
     - funlen
     - ginkgolinter
     - gocheckcompilerdirectives
@@ -84,7 +82,6 @@ linters:
     - unparam
     - usestdlibvars
     - usetesting
-    - varnamelen
     - wastedassign
     - whitespace
     - zerologlint

@@ -2,7 +2,8 @@ package csrf
 
 const (
 	// TokenHeader is the header name for CSRF token
-	TokenHeader = "X-CSRF-Token"
+	TokenHeader = "X-CSRF-Token" /* #nosec G101 */
+
 	// TokenFormField is the form field name for CSRF token
 	TokenFormField = "csrf_token"
 	// TokenKey is the session key for storing CSRF token
