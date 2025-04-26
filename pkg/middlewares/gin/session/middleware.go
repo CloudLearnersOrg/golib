@@ -9,12 +9,6 @@ import (
 )
 
 func NewMiddleware(cfg SessionConfig) (gin.HandlerFunc, error) {
-	// Set password to empty string if not provided
-	password := cfg.RedisPassword
-	if password == "" {
-		password = ""
-	}
-
 	// Initialize Redis store with conditional password
 	redisStore, err := redis.NewStore(
 		cfg.RedisConnectionPoolSize, // pool size
